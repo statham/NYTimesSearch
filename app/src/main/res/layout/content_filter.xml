@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="com.example.kystatham.nytimessearch.activities.FilterActivity"
+    tools:showIn="@layout/activity_filter">
+
+    <TextView
+        android:id="@+id/tvSort"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="80dp"
+        android:layout_marginTop="75dp"
+        android:text="@string/sort"
+        android:textAppearance="@android:style/TextAppearance.Material.Medium"
+        android:textColor="@android:color/black" />
+
+    <Spinner
+        android:id="@+id/spnSort"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:entries="@array/sort_orders_array"
+        android:layout_alignBaseline="@+id/tvSort"
+        android:layout_alignBottom="@+id/tvSort"
+        android:layout_toRightOf="@+id/btnSave"
+        android:layout_toEndOf="@+id/btnSave" />
+
+    <Button
+        android:id="@+id/btnSave"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/save"
+        android:onClick="onFilterSave"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:id="@+id/tvNewsDesk"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/tvSort"
+        android:layout_alignStart="@+id/tvSort"
+        android:layout_below="@+id/spnSort"
+        android:layout_marginTop="20dp"
+        android:text="@string/news_desk"
+        android:textAppearance="@android:style/TextAppearance.Material.Medium"
+        android:textColor="@android:color/black" />
+
+    <CheckBox
+        android:id="@+id/cbArts"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/tvNewsDesk"
+        android:layout_toEndOf="@+id/btnSave"
+        android:layout_toRightOf="@+id/btnSave"
+        android:text="@string/arts"
+        android:onClick="onCheckboxClicked"/>
+
+    <CheckBox
+        android:id="@+id/cbFashionStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/cbArts"
+        android:layout_alignStart="@+id/cbArts"
+        android:layout_below="@+id/cbArts"
+        android:text="@string/fashion_style"
+        android:onClick="onCheckboxClicked"/>
+
+    <CheckBox
+        android:id="@+id/cbSports"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/cbFashionStyle"
+        android:layout_alignStart="@+id/cbFashionStyle"
+        android:layout_below="@+id/cbFashionStyle"
+        android:text="@string/sports"
+        android:onClick="onCheckboxClicked"/>
+</RelativeLayout>

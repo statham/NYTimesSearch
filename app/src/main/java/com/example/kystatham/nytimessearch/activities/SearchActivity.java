@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -36,6 +35,11 @@ public class SearchActivity extends AppCompatActivity {
 
     ArrayList<Article> articles;
     ArticleArrayAdapter adapter;
+
+    private final int FILTER_REQUEST_CODE = 20;
+
+    String sortOrder;
+    String newsDesk;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,15 +85,23 @@ public class SearchActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            showFilterView();
             return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK && requestCode == FILTER_REQUEST_CODE) {
+            sortOrder = data.getStringExtra("sort");
+            newsDesk = data.getStringExtra("news_desk");
+        }
+    }
+
     public void onArticleSearch(View view) {
         String query = etQuery.getText().toString();
-//        Toast.makeText(this, "Searching for " + query, Toast.LENGTH_LONG).show();
         AsyncHttpClient client = new AsyncHttpClient();
         String url = "https://api.nytimes.com/svc/search/v2/articlesearch.json";
 
@@ -97,6 +109,13 @@ public class SearchActivity extends AppCompatActivity {
         params.put("api-key", "bb47ba367da542c69919879967ec9d4a");
         params.put("page", 0);
         params.put("q", query);
+
+        if (sortOrder != null) {
+            params.put("sort", sortOrder);
+        }
+        if (newsDesk != "") {
+            params.put("fq", "section_name:\"" + newsDesk + "\"");
+        }
 
         client.get(url, params, new JsonHttpResponseHandler() {
             @Override
@@ -106,11 +125,15 @@ public class SearchActivity extends AppCompatActivity {
                 try {
                     articleJsonResults = response.getJSONObject("response").getJSONArray("docs");
                     adapter.addAll(Article.fromJSONArray(articleJsonResults));
-                    Log.d("DEBUG", articles.toString());
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
         });
+    }
+
+    public void showFilterView() {
+        Intent i = new Intent(getApplicationContext(), FilterActivity.class);
+        startActivityForResult(i, FILTER_REQUEST_CODE);
     }
 }
