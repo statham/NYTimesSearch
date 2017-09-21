@@ -113,8 +113,8 @@ public class SearchActivity extends AppCompatActivity {
         if (sortOrder != null) {
             params.put("sort", sortOrder);
         }
-        if (newsDesk != "") {
-            params.put("fq", "section_name:\"" + newsDesk + "\"");
+        if (newsDesk != null && newsDesk != "") {
+            params.put("fq", "news_desk:" + newsDesk);
         }
 
         client.get(url, params, new JsonHttpResponseHandler() {
@@ -124,6 +124,7 @@ public class SearchActivity extends AppCompatActivity {
 
                 try {
                     articleJsonResults = response.getJSONObject("response").getJSONArray("docs");
+                    adapter.clear();
                     adapter.addAll(Article.fromJSONArray(articleJsonResults));
                 } catch (JSONException e) {
                     e.printStackTrace();

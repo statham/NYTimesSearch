@@ -10,13 +10,16 @@ import android.widget.Spinner;
 
 import com.example.kystatham.nytimessearch.R;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class FilterActivity extends AppCompatActivity {
 
-    private final String ARTS = "arts";
-    private final String FASHION_STYLE = "fashion & style";
-    private final String SPORTS = "sports";
+    private final String ARTS = "Arts";
+    private final String FASHION_STYLE = "Fashion & Style";
+    private final String SPORTS = "Sports";
 
-    public String checkedBox = "";
+    public List<String> checkedNewsDesks = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,38 +34,49 @@ public class FilterActivity extends AppCompatActivity {
         Spinner sortOrder = (Spinner) findViewById(R.id.spnSort);
         Intent data = new Intent();
         data.putExtra("sort", sortOrder.getSelectedItem().toString().toLowerCase());
-        data.putExtra("news_desk", checkedBox);
+        data.putExtra("news_desk", getStringExtraFromChecked(checkedNewsDesks));
         setResult(RESULT_OK, data);
         finish();
+    }
+
+    public String getStringExtraFromChecked(List<String> checked) {
+        if (checked.size() == 0) return "";
+        StringBuilder checkedString = new StringBuilder("(");
+        for (int i = 0; i < checked.size(); i++) {
+            checkedString.append("\"");
+            checkedString.append(checked.get(i));
+            checkedString.append("\"");
+            if (i != checked.size() - 1) {
+                checkedString.append(" ");
+            }
+        }
+        checkedString.append(")");
+        return checkedString.toString();
     }
 
     public void onCheckboxClicked(View view) {
         boolean checked = ((CheckBox) view).isChecked();
 
-        if (!checked) {
-            checkedBox = "";
-        }
-
         switch (view.getId()) {
             case R.id.cbArts:
                 if (checked) {
-                    checkedBox = ARTS;
-                    ((CheckBox) findViewById(R.id.cbFashionStyle)).setChecked(false);
-                    ((CheckBox) findViewById(R.id.cbSports)).setChecked(false);
+                    checkedNewsDesks.add(ARTS);
+                } else {
+                    checkedNewsDesks.remove(ARTS);
                 }
                 break;
             case R.id.cbFashionStyle:
                 if (checked) {
-                    checkedBox = FASHION_STYLE;
-                    ((CheckBox) findViewById(R.id.cbArts)).setChecked(false);
-                    ((CheckBox) findViewById(R.id.cbSports)).setChecked(false);
+                    checkedNewsDesks.add(FASHION_STYLE);
+                } else {
+                    checkedNewsDesks.remove(FASHION_STYLE);
                 }
                 break;
             case R.id.cbSports:
                 if (checked) {
-                    checkedBox = SPORTS;
-                    ((CheckBox) findViewById(R.id.cbFashionStyle)).setChecked(false);
-                    ((CheckBox) findViewById(R.id.cbArts)).setChecked(false);
+                    checkedNewsDesks.add(SPORTS);
+                } else {
+                    checkedNewsDesks.remove(SPORTS);
                 }
                 break;
         }
