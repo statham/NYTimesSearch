@@ -26,6 +26,7 @@ public class FilterActivity extends AppCompatActivity implements DatePickerDialo
     private final String SPORTS = "Sports";
 
     public List<String> checkedNewsDesks = new ArrayList<>();
+    public Date date;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +42,7 @@ public class FilterActivity extends AppCompatActivity implements DatePickerDialo
         Intent data = new Intent();
         data.putExtra("sort", sortOrder.getSelectedItem().toString().toLowerCase());
         data.putExtra("news_desk", getStringExtraFromChecked(checkedNewsDesks));
+        data.putExtra("begin_date", date);
         setResult(RESULT_OK, data);
         finish();
     }
@@ -100,7 +102,7 @@ public class FilterActivity extends AppCompatActivity implements DatePickerDialo
         c.set(Calendar.MONTH, monthOfYear);
         c.set(Calendar.DAY_OF_MONTH, dayOfMonth);
         SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yy");
-        Date d = new Date(year, monthOfYear, dayOfMonth);
-        ((EditText) findViewById(R.id.etBeginDate)).setText(dateFormat.format(d));
+        date = c.getTime();
+        ((EditText) findViewById(R.id.etBeginDate)).setText(dateFormat.format(date));
     }
 }

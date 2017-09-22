@@ -23,7 +23,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 import cz.msebera.android.httpclient.Header;
 
@@ -40,6 +42,7 @@ public class SearchActivity extends AppCompatActivity {
 
     String sortOrder;
     String newsDesk;
+    Date beginDate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,6 +100,7 @@ public class SearchActivity extends AppCompatActivity {
         if (resultCode == RESULT_OK && requestCode == FILTER_REQUEST_CODE) {
             sortOrder = data.getStringExtra("sort");
             newsDesk = data.getStringExtra("news_desk");
+            beginDate = (Date) data.getSerializableExtra("begin_date");
         }
     }
 
@@ -113,8 +117,12 @@ public class SearchActivity extends AppCompatActivity {
         if (sortOrder != null) {
             params.put("sort", sortOrder);
         }
-        if (newsDesk != null && newsDesk != "") {
+        if (newsDesk != null && newsDesk.length() > 0) {
             params.put("fq", "news_desk:" + newsDesk);
+        }
+        if (beginDate != null) {
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
+            params.put("begin_date", simpleDateFormat.format(beginDate));
         }
 
         client.get(url, params, new JsonHttpResponseHandler() {
