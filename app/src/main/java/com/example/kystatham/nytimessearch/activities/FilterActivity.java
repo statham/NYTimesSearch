@@ -1,19 +1,25 @@
 package com.example.kystatham.nytimessearch.activities;
 
+import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.CheckBox;
+import android.widget.DatePicker;
+import android.widget.EditText;
 import android.widget.Spinner;
 
 import com.example.kystatham.nytimessearch.R;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
-public class FilterActivity extends AppCompatActivity {
+public class FilterActivity extends AppCompatActivity implements DatePickerDialog.OnDateSetListener {
 
     private final String ARTS = "Arts";
     private final String FASHION_STYLE = "Fashion & Style";
@@ -80,5 +86,21 @@ public class FilterActivity extends AppCompatActivity {
                 }
                 break;
         }
+    }
+
+    public void showDatePickerDialog(View v) {
+        DatePickerFragment newFragment = new DatePickerFragment();
+        newFragment.show(getSupportFragmentManager(), "datePicker");
+    }
+
+    @Override
+    public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+        final Calendar c = Calendar.getInstance();
+        c.set(Calendar.YEAR, year);
+        c.set(Calendar.MONTH, monthOfYear);
+        c.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yy");
+        Date d = new Date(year, monthOfYear, dayOfMonth);
+        ((EditText) findViewById(R.id.etBeginDate)).setText(dateFormat.format(d));
     }
 }
