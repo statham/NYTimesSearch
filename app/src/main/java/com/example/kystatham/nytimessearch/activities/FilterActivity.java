@@ -24,6 +24,7 @@ public class FilterActivity extends AppCompatActivity implements DatePickerDialo
     private final String ARTS = "Arts";
     private final String FASHION_STYLE = "Fashion & Style";
     private final String SPORTS = "Sports";
+    private final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM/dd/yy");
 
     public List<String> checkedNewsDesks = new ArrayList<>();
     public Date date;
@@ -101,8 +102,7 @@ public class FilterActivity extends AppCompatActivity implements DatePickerDialo
         c.set(Calendar.YEAR, year);
         c.set(Calendar.MONTH, monthOfYear);
         c.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-        SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yy");
         date = c.getTime();
-        ((EditText) findViewById(R.id.etBeginDate)).setText(dateFormat.format(date));
+        ((EditText) findViewById(R.id.etBeginDate)).setText(simpleDateFormat.format(date));
     }
 }
