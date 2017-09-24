@@ -2,7 +2,7 @@
 
 **NYTimesSearch** is an android app that allows a user to search for articles on web using simple filters. The app utilizes [New York Times Search API](http://developer.nytimes.com/docs/read/article_search_api_v2).
 
-Time spent: **7** hours spent in total
+Time spent: **9** hours spent in total
 
 ## User Stories
 
@@ -21,8 +21,8 @@ The following **required** functionality is completed:
 The following **optional** features are implemented:
 
 * [ ] Implements robust error handling, [check if internet is available](http://guides.codepath.com/android/Sending-and-Managing-Network-Requests#checking-for-network-connectivity), handle error cases, network failures
-* [ ] Used the **ActionBar SearchView** or custom layout as the query box instead of an EditText
-* [ ] User can **share an article link** to their friends or email it to themselves
+* [X] Used the **ActionBar SearchView** or custom layout as the query box instead of an EditText
+* [X] User can **share an article link** to their friends or email it to themselves
 * [ ] Replaced Filter Settings Activity with a lightweight modal overlay
 
 The following **bonus** features are implemented:
