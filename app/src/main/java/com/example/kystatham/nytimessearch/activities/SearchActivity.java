@@ -1,7 +1,11 @@
 package com.example.kystatham.nytimessearch.activities;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
@@ -12,6 +16,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.Toast;
 
 import com.example.kystatham.nytimessearch.R;
 import com.example.kystatham.nytimessearch.adapters.ArticleArrayAdapter;
@@ -25,6 +30,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -40,6 +46,7 @@ public class SearchActivity extends AppCompatActivity {
     ArticleArrayAdapter adapter;
 
     private final int FILTER_REQUEST_CODE = 20;
+    private int offset = 0;
 
     String sortOrder;
     String newsDesk;
@@ -63,10 +70,14 @@ public class SearchActivity extends AppCompatActivity {
         gvResults.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent i = new Intent(getApplicationContext(), ArticleActivity.class);
-                Article article = articles.get(position);
-                i.putExtra("article", article);
-                startActivity(i);
+                if (isNetworkAvailable() && isOnline()) {
+                    Intent i = new Intent(getApplicationContext(), ArticleActivity.class);
+                    Article article = articles.get(position);
+                    i.putExtra("article", article);
+                    startActivity(i);
+                } else {
+                    showNoInternetToast();
+                }
             }
         });
 
@@ -75,8 +86,8 @@ public class SearchActivity extends AppCompatActivity {
             public boolean onLoadMore(int page, int totalItemsCount) {
                 // Triggered only when new data needs to be appended to the list
                 // Add whatever code is needed to append new items to your AdapterView
-                loadNextDataFromApi(page);
-                // or loadNextDataFromApi(totalItemsCount);
+                offset = page;
+                onArticleSearch();
                 return true; // ONLY if more data is actually being loaded; false otherwise.
             }
         });
@@ -93,6 +104,9 @@ public class SearchActivity extends AppCompatActivity {
             public boolean onQueryTextSubmit(String query) {
                 // perform query here
                 searchQuery = query;
+                adapter.clear();
+                adapter.notifyDataSetChanged();
+                offset = 0;
                 onArticleSearch();
 
                 // workaround to avoid issues with some emulators and keyboard devices firing twice if a keyboard enter is used
@@ -141,51 +155,6 @@ public class SearchActivity extends AppCompatActivity {
 
         RequestParams params = new RequestParams();
         params.put("api-key", "bb47ba367da542c69919879967ec9d4a");
-        params.put("page", 0);
-
-        if (searchQuery != null) {
-            params.put("q", searchQuery);
-        }
-
-        if (sortOrder != null) {
-            params.put("sort", sortOrder);
-        }
-        if (newsDesk != null && newsDesk.length() > 0) {
-            params.put("fq", "news_desk:" + newsDesk);
-        }
-        if (beginDate != null) {
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
-            params.put("begin_date", simpleDateFormat.format(beginDate));
-        }
-
-        client.get(url, params, new JsonHttpResponseHandler() {
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                JSONArray articleJsonResults = null;
-
-                try {
-                    articleJsonResults = response.getJSONObject("response").getJSONArray("docs");
-                    adapter.clear();
-                    adapter.notifyDataSetChanged();
-                    adapter.addAll(Article.fromJSONArray(articleJsonResults));
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-    }
-
-    public void showFilterView() {
-        Intent i = new Intent(getApplicationContext(), FilterActivity.class);
-        startActivityForResult(i, FILTER_REQUEST_CODE);
-    }
-
-    public void loadNextDataFromApi(int offset) {
-        AsyncHttpClient client = new AsyncHttpClient();
-        String url = "https://api.nytimes.com/svc/search/v2/articlesearch.json";
-
-        RequestParams params = new RequestParams();
-        params.put("api-key", "bb47ba367da542c69919879967ec9d4a");
         params.put("page", offset);
 
         if (searchQuery != null) {
@@ -203,18 +172,71 @@ public class SearchActivity extends AppCompatActivity {
             params.put("begin_date", simpleDateFormat.format(beginDate));
         }
 
-        client.get(url, params, new JsonHttpResponseHandler() {
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                JSONArray articleJsonResults = null;
+        if (isNetworkAvailable() && isOnline()) {
+            client.get(url, params, new JsonHttpResponseHandler() {
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                    JSONArray articleJsonResults = null;
 
-                try {
-                    articleJsonResults = response.getJSONObject("response").getJSONArray("docs");
-                    adapter.addAll(Article.fromJSONArray(articleJsonResults));
-                } catch (JSONException e) {
-                    e.printStackTrace();
+                    try {
+                        articleJsonResults = response.getJSONObject("response").getJSONArray("docs");
+                        adapter.addAll(Article.fromJSONArray(articleJsonResults));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                 }
+
+                @Override
+                public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                    if (statusCode == 429) {
+                        retrySearch();
+                    } else {
+                        Toast.makeText(getApplicationContext(), "Unexpected error occurred.", Toast.LENGTH_SHORT);
+                    }
+                }
+            });
+        } else {
+            showNoInternetToast();
+        }
+    }
+
+    public void retrySearch() {
+        Handler handler = new Handler();
+
+         Runnable runnableCode = new Runnable() {
+            @Override
+            public void run() {
+                onArticleSearch();
             }
-        });
+        };
+
+        handler.postDelayed(runnableCode, 2000);
+    }
+
+    public void showFilterView() {
+        Intent i = new Intent(getApplicationContext(), FilterActivity.class);
+        startActivityForResult(i, FILTER_REQUEST_CODE);
+    }
+
+    private Boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting();
+    }
+
+    public boolean isOnline() {
+        Runtime runtime = Runtime.getRuntime();
+        try {
+            Process ipProcess = runtime.exec("/system/bin/ping -c 1 8.8.8.8");
+            int     exitValue = ipProcess.waitFor();
+            return (exitValue == 0);
+        } catch (IOException e)          { e.printStackTrace(); }
+        catch (InterruptedException e) { e.printStackTrace(); }
+        return false;
+    }
+
+    public void showNoInternetToast() {
+        Toast.makeText(getApplicationContext(), "Please connect to internet.", Toast.LENGTH_SHORT).show();
     }
 }
